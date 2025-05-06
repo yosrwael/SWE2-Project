@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Discount Manager</title>
+    <link rel="stylesheet" href="/css/discount.css">
+</head>
+
+<body>
+    <div class="nav-bar">
+        <h1>DISCOUNT MANAGER</h1>
+        <button class="apply-btn" onclick="toggleAddForm()">Add</button>
+
+        <form id="add-form" action="/api/products" method="POST" style="display:none; margin-top: 15px;">
+            <input type="text" name="title" placeholder="Title" required>
+            <textarea name="description" placeholder="Description" required></textarea>
+            <input type="text" name="category" placeholder="Category" required>
+            <input type="number" name="price" placeholder="Price" step="0.01" required>
+            <input type="text" name="image" placeholder="Image URL" required>
+            <input type="number" name="discount" placeholder="Discount %" min="0" max="100" value="0">
+            <button type="submit" class="apply-btn">Save Product</button>
+            <button type="button" onclick="toggleAddForm()">Cancel</button>
+        </form>
+    </div>
+
+    <div class="discount-container">
+        <% products.forEach(product=> { %>
+            <div class="product-row">
+                <img src="<%= product.image %>" alt="Product Image" class="product-image">
+
+                <div class="product-details">
+                    <h3 class="product-title">
+                        <%= product.title %>
+                    </h3>
+                    <% if (product.discount > 0) { %>
+                        <p class="product-discount">Discount: <%= product.discount %>%</p>
+                        <p class="product-price">
+                          <s><%= product.price %></s>
+                          <strong>
+                            <%= (product.price * (1 - product.discount / 100)).toFixed(2) %> EGP
+                          </strong>
+                        </p>
+                      <% } else { %>
+                        <p class="product-price"><%= product.price %> EGP</p>
+                      <% } %>
+                    <!-- <p class="product-price">Price: <%= product.price %> EGP</p> -->
+
+                    <div class="discount-input">
+                        <form action="/api/discount" method="post">
+                            <input type="hidden" value="<%= product._id %>" name="id">
+                            <input type="number" placeholder="Discount %" min="0" max="100" name="discount">
+                            <button class="apply-btn" type="submit">Apply</button>
+                        </form>
+                        <form action="/api/discount" method="post">
+                            <input type="hidden" value="<%= product._id %>" name="id">
+                            <button class="remove-btn" type="submit">Remove</button>
+                        </form>
+
+                        <button class="apply-btn" onclick="toggleEditForm('<%= product._id %>')">Edit</button>
+                        <form id="edit-form-<%= product._id %>" action="/api/products/<%= product._id %>?_method=PUT" method="POST" style="display:none;">
+                            <div><input type="text" name="title" value="<%= product.title %>" required></div>
+                            <div><textarea name="description" required><%= product.description %></textarea></div>
+                            <div><input type="text" name="category" value="<%= product.category %>" required></div>
+                            <div><input type="number" name="price" value="<%= product.price %>" required></div>
+                            <div><input type="text" name="image" value="<%= product.image %>" required></div>
+                            <div><input type="number" name="discount" value="<%= product.discount %>" required></div>
+                            <div><button type="submit">Save Changes</button></div>
+                            <div><button type="button" onclick="toggleEditForm('<%= product._id %>')">Cancel</button></div>
+                        </form>
+                        <script>
+                        function toggleEditForm(productId) {
+                            const form = document.getElementById(`edit-form-${productId}`);
+                            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                        }
+                        </script>
+                        
+                    
+                        <form action="/api/products/<%= product._id %>?_method=DELETE" method="POST">
+                            <button class="remove-btn" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+    </div>
+</body>
+
+</html>
+
+<script>
+    function toggleAddForm() {
+        const form = document.getElementById('add-form');
+        form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    }
+</script>
