@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const { showDiscount, calculateNewPrice } = require('../helpers/discount');
 
 const homePage = async (req, res) => {
   if (!req.session.user) {
@@ -33,6 +34,8 @@ const discountPage = async (req, res) => {
   res.render("../views/discount.ejs", {
     user: req.session.user,
     products: products,
+    showDiscount,
+    calculateNewPrice,
   });
 };
 

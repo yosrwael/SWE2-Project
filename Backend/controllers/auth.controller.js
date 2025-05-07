@@ -1,96 +1,93 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/user");
+const Users = require("../models/user");
 
 const register = async (req, res) => {
-    const { username, email, password, firstName, lastName, mobileNumber, gender, isAdmin } = req.body;
+    const {
+        firstName,
+        lastName,
+        mobile,
+        gender,
+        username,
+        email,
+        password,
+        confirmPassword,
+        isAdmin,
+        isTest,
+    } = req.body;
 
-    if (!username || !email || !password || !firstName || !lastName || !mobileNumber || !gender) {
+    if (!firstName || !lastName || !mobile || !gender || !username || !email || !password || !confirmPassword) {
         return res.status(400).json({
             status: "failure",
             message: "Missing required fields",
         });
     }
 
-    try {
-        
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({
-                status: "failure",
-                message: "User already exists",
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = new User({
-            username,
-            email,
-            password: hashedPassword,
-            firstName,
-            lastName,
-            mobileNumber,
-            gender,
-            isAdmin: isAdmin || false, 
-        });
-
-        await newUser.save();
-        req.session.user = newUser;
-        res.redirect("/home"); 
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            status: "error",
-            message: "Internal server error",
+    if (password !== confirmPassword) {
+        return res.status(400).json({
+            status: "failure",
+            message: "Passwords do not match",
         });
     }
+
+    const existingUser = await Users.findOne({ email: email });
+
+    if (existingUser) {
+        return res.status(400).json({
+            status: "failure",
+            message: "User already exists",
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new Users({
+        firstName: firstName,
+        lastName: lastName,
+        mobile: mobile,
+        gender: gender,
+        username: username,
+        email: email,
+        password: hashedPassword,
+        isAdmin: isAdmin,
+        isTest: isTest,
+    });
+
+    await newUser.save();
+    req.session.user = newUser;
+    res.redirect("/home");
 };
+
 
 const login = async (req, res) => {
     const { email, password } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({
-                status: "failure",
-                message: "Invalid email or password",
-            });
-        }
-
-        const correctPassword = await bcrypt.compare(password, user.password);
-        if (!correctPassword) {
-            return res.status(400).json({
-                status: "failure",
-                message: "Invalid email or password",
-            });
-        }
-
-        req.session.user = user;
-        res.redirect("/home"); 
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            status: "error",
-            message: "Internal server error",
+    const user = await Users.findOne({ email: email });
+    // console.log(user.username);
+    if (!user) {
+        return res.status(400).json({
+            status: "failure",
+            message: "Invalid email or password",
         });
     }
-};
+
+    const correctPassword = await bcrypt.compare(password, user.password);
+    
+    if (!correctPassword) {
+        return res.status(400).json({
+            status: "failure",
+            message: "Invalid email or password",
+        });
+    }
+
+    req.session.user = user;
+    res.redirect("/home");
+}
 
 const logout = async (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({
-                status: "error",
-                message: "Failed to logout",
-            });
-        }
-        res.redirect("/auth");
-    });
-};
+    req.session.destroy();
+    res.redirect("/login");
+}
 
 module.exports = {
     register,
     login,
     logout,
-};
+}

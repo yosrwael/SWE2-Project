@@ -41,9 +41,9 @@ app.use('/', authRoutes);
 
 app.use('/', pageRoutes);
 
-app.get('/', (req, res) => {
-  res.send('views/home'); // or res.render('index') if you have a view
-});
+// app.get('/', (req, res) => {
+//   res.send('views/home'); // or res.render('index') if you have a view
+// });
 
 
 
@@ -104,6 +104,4 @@ app.listen(process.env.PORT, () => {
 // app.use('/', pageRoutes);
 
 // module.exports = app;
-
-
 

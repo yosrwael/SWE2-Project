@@ -15,9 +15,24 @@ body {
     flex-direction: column;
     gap: 20px;
     /* max-width: 900px; */
-    width: 90%;
-    margin: 0 auto;
+    width: 60%;
+    margin-left: 2%; /* Aligns to the left */
   }
+  .custom-btn {
+    background-color: #4CAF50; /* Matching green background as Apply buttons */
+    color: white;
+    padding: 8px 15px; /* Adjusted padding to match Apply button dimensions */
+    border: none;
+    border-radius: 5px; /* Less rounded corners to match Apply buttons */
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: normal; /* Remove bold to match Apply buttons */
+    transition: background-color 0.3s; /* Smooth transition for background */
+}
+
+.custom-btn:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
   
   .product-discount {
     color: #ff3b3b;
